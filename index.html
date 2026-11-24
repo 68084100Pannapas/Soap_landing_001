@@ -5,12 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ร้านสบู่ธรรมชาติ - 2 SKUs</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+        }
+    </style>
 </head>
 <body class="bg-amber-50 text-stone-800 font-sans min-h-screen">
-    <div class="max-w-4xl mx-auto px-4 py-8">
+
+    <!-- เมนูสลับหน้า หน้าร้านค้า / ระบบแพ็คของ -->
+    <nav class="bg-amber-800 text-white p-4 shadow-md no-print">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <span class="font-bold text-lg">🌿 สบู่ธรรมชาติ Handmade</span>
+            <div class="space-x-2">
+                <button onclick="switchTab('shop')" id="btn-shop" class="bg-white text-amber-900 px-4 py-1.5 rounded-lg font-bold text-sm">หน้าร้านค้า</button>
+                <button onclick="switchTab('packing')" id="btn-packing" class="bg-amber-900 hover:bg-amber-950 px-4 py-1.5 rounded-lg text-sm">📦 ระบบหยิบ/แพ็ค & ใบจ่าหน้า</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ส่วนที่ 1: หน้าร้านค้า -->
+    <div id="tab-shop" class="max-w-4xl mx-auto px-4 py-8 no-print">
         <header class="text-center mb-10">
             <h1 class="text-4xl font-extrabold text-amber-800 tracking-tight">สบู่ธรรมชาติ Handmade 🌿</h1>
-            <p class="text-stone-600 mt-2">เลือกสูตรสบู่ที่ใช่สำหรับคุณ (อย่างน้อย 2 SKUs)</p>
+            <p class="text-stone-600 mt-2">เลือกสูตรสบู่ที่ใช่สำหรับคุณ (2 SKUs)</p>
         </header>
 
         <!-- Product Grid (2 SKUs) -->
@@ -93,8 +112,44 @@
         </div>
     </div>
 
+    <!-- ส่วนที่ 2: ระบบหยิบสินค้า แพ็คสินค้า และใบจ่าหน้าพัสดุ -->
+    <div id="tab-packing" class="max-w-4xl mx-auto px-4 py-8 hidden">
+        <div class="flex justify-between items-center mb-6 no-print">
+            <div>
+                <h2 class="text-2xl font-bold text-amber-900">📦 รายการหยิบสินค้า & แพ็คพัสดุ</h2>
+                <p class="text-sm text-stone-600">ดึงข้อมูลออเดอร์จาก Google Sheets เพื่อจัดเตรียมและพิมพ์ใบจ่าหน้า</p>
+            </div>
+            <button onclick="fetchOrders()" class="bg-amber-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-amber-800">🔄 รีเฟรชข้อมูล</button>
+        </div>
+
+        <div id="loading" class="text-center py-10 text-stone-500 no-print">กำลังดึงข้อมูลจาก Google Sheets...</div>
+        <div id="orders-container" class="space-y-4 no-print"></div>
+
+        <!-- ใบจ่าหน้าพัสดุสำหรับสั่งพิมพ์ -->
+        <div id="print-label-area" class="hidden print-only border-2 border-black p-6 max-w-lg mx-auto bg-white mt-4">
+            <div class="border-b-2 border-black pb-3 mb-3 flex justify-between items-center">
+                <div>
+                    <p class="font-bold text-lg">ผู้ส่ง (SENDER):</p>
+                    <p class="text-sm">ร้านสบู่ธรรมชาติ Handmade</p>
+                    <p class="text-sm">โทร. 02-999-8888</p>
+                </div>
+                <span id="lbl-orderid" class="font-mono font-bold border border-black px-2 py-1 text-sm"></span>
+            </div>
+            <div class="py-4 border-b-2 border-black mb-3">
+                <p class="font-bold text-lg mb-1">ผู้รับ (RECEIVER):</p>
+                <p id="lbl-name" class="text-xl font-bold"></p>
+                <p id="lbl-phone" class="text-md font-semibold mt-1"></p>
+                <p id="lbl-address" class="text-md mt-2 leading-relaxed"></p>
+            </div>
+            <div class="bg-gray-100 p-3 border border-black">
+                <p class="font-bold text-sm underline mb-1">รายการหยิบสินค้า (Picking List):</p>
+                <p id="lbl-item" class="text-md font-bold"></p>
+            </div>
+        </div>
+    </div>
+
     <!-- Success Modal -->
-    <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50 no-print">
         <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
             <span class="text-5xl">🎉</span>
             <h4 class="text-2xl font-bold text-amber-800 mt-4">สั่งซื้อสำเร็จ!</h4>
@@ -110,7 +165,15 @@
 
     <script>
         let selectedProduct = { name: '', price: 0 };
-        const webAppUrl = https://script.google.com/a/macros/spumail.net/s/AKfycbwh_y0zCpsttj9iAmqkJFlO30rvbOv-Jk4Uz5a9w9YzKAkDCTZs5cqYLHS_i0rrg89kkQ/exec
+        const webAppUrl = "https://script.google.com/a/macros/spumail.net/s/AKfycbwh_y0zCpsttj9iAmqkJFlO30rvbOv-Jk4Uz5a9w9YzKAkDCTZs5cqYLHS_i0rrg89kkQ/exec";
+
+        function switchTab(tab) {
+            document.getElementById('tab-shop').classList.toggle('hidden', tab !== 'shop');
+            document.getElementById('tab-packing').classList.toggle('hidden', tab !== 'packing');
+            document.getElementById('btn-shop').className = tab === 'shop' ? 'bg-white text-amber-900 px-4 py-1.5 rounded-lg font-bold text-sm' : 'bg-amber-900 hover:bg-amber-950 px-4 py-1.5 rounded-lg text-sm';
+            document.getElementById('btn-packing').className = tab === 'packing' ? 'bg-white text-amber-900 px-4 py-1.5 rounded-lg font-bold text-sm' : 'bg-amber-900 hover:bg-amber-950 px-4 py-1.5 rounded-lg text-sm';
+            if (tab === 'packing') fetchOrders();
+        }
 
         function selectProduct(name, price) {
             selectedProduct = { name, price };
@@ -133,7 +196,9 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "กำลังบันทึกข้อมูล...";
 
+            const orderId = "ORD-" + Math.floor(100000 + Math.random() * 900000);
             const payload = {
+                order_id: orderId,
                 customer_name: document.getElementById('customerName').value,
                 phone: document.getElementById('phone').value,
                 address: document.getElementById('address').value,
@@ -145,11 +210,11 @@
             fetch(webAppUrl, {
                 method: 'POST',
                 mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload)
             })
             .then(() => {
-                document.getElementById('popupOrderId').innerText = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+                document.getElementById('popupOrderId').innerText = orderId;
                 document.getElementById('successPopup').classList.remove('hidden');
                 document.getElementById('orderForm').reset();
                 document.getElementById('orderFormSection').classList.add('hidden');
@@ -165,6 +230,67 @@
 
         function closePopup() {
             document.getElementById('successPopup').classList.add('hidden');
+        }
+
+        async function fetchOrders() {
+            const container = document.getElementById('orders-container');
+            const loading = document.getElementById('loading');
+            container.innerHTML = "";
+            loading.classList.remove('hidden');
+
+            try {
+                const res = await fetch(webAppUrl);
+                const orders = await res.json();
+                loading.classList.add('hidden');
+
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = "<p class='text-center text-stone-500'>ยังไม่มีรายการสั่งซื้อ</p>";
+                    return;
+                }
+
+                orders.reverse().forEach((o, i) => {
+                    const name = o.customer_name || o.CustomerName || o.name || "-";
+                    const phone = o.phone || o.Phone || "-";
+                    const address = o.address || o.Address || "-";
+                    const sku = o.sku || o.SKU || o.ProductName || "-";
+                    const qty = o.qty || o.Quantity || "1";
+                    const oid = o.order_id || o.OrderID || ("ORD-" + (i + 1));
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-5 rounded-xl shadow border border-amber-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4";
+                    card.innerHTML = `
+                        <div class="space-y-1">
+                            <span class="font-bold text-amber-800">${oid}</span>
+                            <p class="font-bold text-lg">หยิบสินค้า: <span class="text-amber-700">${sku}</span> — จำนวน <span class="underline text-xl">${qty}</span> ชิ้น</p>
+                            <p class="text-sm text-stone-600">ผู้รับ: <b>${name}</b> (${phone}) | ที่อยู่: ${address}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label class="flex items-center gap-1.5 text-sm bg-amber-50 text-amber-900 px-3 py-2 rounded-lg border border-amber-200 cursor-pointer">
+                                <input type="checkbox" class="w-4 h-4 accent-amber-700"> หยิบครบแล้ว
+                            </label>
+                            <button onclick='printLabel(${JSON.stringify({oid, name, phone, address, sku, qty})})' class="bg-stone-800 hover:bg-black text-white px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
+                                🖨️ พิมพ์ใบจ่าหน้า
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                loading.innerText = "โหลดข้อมูลไม่สำเร็จ (ตรวจสอบว่าใน Apps Script ตั้งสิทธิ์เป็น Anyone แล้ว)";
+            }
+        }
+
+        function printLabel(data) {
+            document.getElementById('lbl-orderid').innerText = data.oid;
+            document.getElementById('lbl-name').innerText = data.name;
+            document.getElementById('lbl-phone').innerText = "โทร: " + String(data.phone).replace("'", "");
+            document.getElementById('lbl-address').innerText = data.address;
+            document.getElementById('lbl-item').innerText = `${data.sku} (จำนวน ${data.qty} ชิ้น)`;
+            
+            const printArea = document.getElementById('print-label-area');
+            printArea.classList.remove('hidden');
+            window.print();
+            printArea.classList.add('hidden');
         }
     </script>
 </body>

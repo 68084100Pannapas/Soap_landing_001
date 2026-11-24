@@ -1,0 +1,171 @@
+ <!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ร้านสบู่ธรรมชาติ - 2 SKUs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-amber-50 text-stone-800 font-sans min-h-screen">
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold text-amber-800 tracking-tight">สบู่ธรรมชาติ Handmade 🌿</h1>
+            <p class="text-stone-600 mt-2">เลือกสูตรสบู่ที่ใช่สำหรับคุณ (อย่างน้อย 2 SKUs)</p>
+        </header>
+
+        <!-- Product Grid (2 SKUs) -->
+        <div class="grid md:grid-cols-2 gap-8 mb-12">
+            <!-- SKU 1 -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-amber-100 flex flex-col justify-between">
+                <div>
+                    <img src="images/Soap1.jpg" alt="สบู่สูตรน้ำนมข้าวธรรมชาติ" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <span class="text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">SKU-01</span>
+                        <h2 class="text-2xl font-bold text-amber-900 mt-2">สูตรน้ำนมข้าวธรรมชาติ 🌾</h2>
+                        <p class="text-stone-600 mt-2">บำรุงล้ำลึก อ่อนโยนต่อผิว เผยผิวเนียนนุ่มอย่างเป็นธรรมชาติ</p>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 flex justify-between items-center border-t border-stone-100 mt-4">
+                    <span class="text-2xl font-bold text-amber-800">89 บาท</span>
+                    <button onclick="selectProduct('SKU-01: สบู่สูตรน้ำนมข้าวธรรมชาติ', 89)" class="bg-amber-700 hover:bg-amber-800 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                        เลือกซื้อ
+                    </button>
+                </div>
+            </div>
+
+            <!-- SKU 2 -->
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-amber-100 flex flex-col justify-between">
+                <div>
+                    <img src="images/soap2.jpg" alt="สบู่สครับกาแฟอาราบิก้า" class="w-full h-64 object-cover">
+                    <div class="p-6">
+                        <span class="text-xs font-semibold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-full">SKU-02</span>
+                        <h2 class="text-2xl font-bold text-amber-900 mt-2">สครับกาแฟอาราบิก้า ☕</h2>
+                        <p class="text-stone-600 mt-2">ช่วยผลัดเซลล์ผิวเก่าอย่างอ่อนโยน ให้ผิวแลดูเนียนใส</p>
+                    </div>
+                </div>
+                <div class="p-6 pt-0 flex justify-between items-center border-t border-stone-100 mt-4">
+                    <span class="text-2xl font-bold text-amber-800">89 บาท</span>
+                    <button onclick="selectProduct('SKU-02: สบู่สครับกาแฟอาราบิก้า', 89)" class="bg-amber-700 hover:bg-amber-800 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+                        เลือกซื้อ
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Form Section -->
+        <div id="orderFormSection" class="bg-white rounded-2xl shadow-lg border border-amber-100 p-8 max-w-lg mx-auto hidden">
+            <h3 class="text-2xl font-bold text-stone-800 mb-6 border-b pb-4">📝 ฟอร์มสั่งซื้อสินค้า</h3>
+            <form id="orderForm" onsubmit="submitOrder(event)" class="space-y-4">
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                    <p class="font-medium text-amber-900">สินค้าที่เลือก: <span id="selectedProductName" class="font-bold"></span></p>
+                    <p class="text-sm text-stone-600 mt-1">ราคาชิ้นละ: <span id="selectedProductPrice"></span> บาท</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">จำนวน (ชิ้น)</label>
+                    <input type="number" id="qty" min="1" value="1" oninput="calculateTotal()" class="w-full p-2.5 border border-stone-300 rounded-lg" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">ยอดรวมที่ต้องชำระ (บาท)</label>
+                    <input type="text" id="totalPriceDisplay" class="w-full p-2.5 bg-stone-100 border border-stone-300 rounded-lg font-bold text-amber-800" readonly>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">ชื่อ-นามสกุล ผู้รับ</label>
+                    <input type="text" id="customerName" class="w-full p-2.5 border border-stone-300 rounded-lg" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="phone" class="w-full p-2.5 border border-stone-300 rounded-lg" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">ที่อยู่จัดส่ง</label>
+                    <textarea id="address" rows="3" class="w-full p-2.5 border border-stone-300 rounded-lg" placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์" required></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-md mt-4">
+                    ยืนยันการสั่งซื้อ ✨
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <span class="text-5xl">🎉</span>
+            <h4 class="text-2xl font-bold text-amber-800 mt-4">สั่งซื้อสำเร็จ!</h4>
+            <p class="text-stone-600 mt-2">บันทึกข้อมูลคำสั่งซื้อเรียบร้อยแล้ว</p>
+            <div class="bg-amber-50 p-3 rounded-lg border border-amber-100 my-4 text-left">
+                <p class="text-sm">รหัสออเดอร์: <span id="popupOrderId" class="font-bold text-amber-800"></span></p>
+            </div>
+            <button onclick="closePopup()" class="w-full bg-stone-800 hover:bg-stone-900 text-white font-semibold py-2.5 rounded-xl transition-colors">
+                ตกลง
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let selectedProduct = { name: '', price: 0 };
+        const webAppUrl = "ใส่_WEB_APP_URL_ของตัวเองที่นี่";
+
+        function selectProduct(name, price) {
+            selectedProduct = { name, price };
+            document.getElementById('selectedProductName').innerText = name;
+            document.getElementById('selectedProductPrice').innerText = price;
+            document.getElementById('qty').value = 1;
+            document.getElementById('orderFormSection').classList.remove('hidden');
+            calculateTotal();
+            document.getElementById('orderFormSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function calculateTotal() {
+            const qty = parseInt(document.getElementById('qty').value) || 1;
+            document.getElementById('totalPriceDisplay').value = selectedProduct.price * qty;
+        }
+
+        function submitOrder(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "กำลังบันทึกข้อมูล...";
+
+            const payload = {
+                customer_name: document.getElementById('customerName').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                sku: selectedProduct.name,
+                qty: document.getElementById('qty').value,
+                total_price: document.getElementById('totalPriceDisplay').value
+            };
+
+            fetch(webAppUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                document.getElementById('popupOrderId').innerText = "ORD-" + Math.floor(100000 + Math.random() * 900000);
+                document.getElementById('successPopup').classList.remove('hidden');
+                document.getElementById('orderForm').reset();
+                document.getElementById('orderFormSection').classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "ยืนยันการสั่งซื้อ ✨";
+            })
+            .catch(err => {
+                alert("ส่งข้อมูลไม่สำเร็จ: " + err);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = "ยืนยันการสั่งซื้อ ✨";
+            });
+        }
+
+        function closePopup() {
+            document.getElementById('successPopup').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
